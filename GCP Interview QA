@@ -1,0 +1,624 @@
+Select distinct(curr.empname) 
+from EMPLOYEE as curr
+left join EMPLOYEE as next
+on curr.empname = next.empname 
+AND curr.location = next.location
+AND curr.year = next.year -1
+where curr.vaccinated = 'yes'
+AND next.infected = 'yes';
+
+
+Q:-Write a SQL query to get employee with 3rd highest salary from each department.
+
+Sol:-
+select employee, department, salary
+From ( select employee, department, salary, Dense_Rank() over(partition by department order by salary desc) rnk
+        FROM Employees
+	) emprank
+where rnk =3;
+		
+Q:- Write a SQL query to fetch 50 percent of record from a table without top / limit.	
+
+Sol:-
+    Select *
+	FROM (
+	       Select *, row_number() over() rnk
+		   From employees )
+      temp
+	WHERE rnk <= (Select records, count(*)/2 from table) ;
+
+Q:- 
+		K
+		KA
+		KAI
+		KAIL
+		KAILA
+		KAILAS
+
+		value = "KAILAS"
+
+Sol:-  for i in range(1,len(value)+1):
+		   print([:i])
+
+Q:-years where revenue declined compared to the previous year.	
+Input
+rev    year
+1000 2001
+1400 2002
+900  2003
+1100 2004
+1000 2005
+
+write query to get 
+year	rev
+2003	900
+2005	1000		   
+	
+Sol:- SELECT rev, year
+		FROM ( Select rev, year, LAG(rev) over(order by year) rev_previous
+		       FROM table) tbl
+	    where rev < rev_previous;
+
+Q:-    Question
+emp_name emp_dep
+abc   it
+def   hr
+ghi  sales
+uio  dev
+pqr   sales
+jkl   it
+
+Output
+emp_name emp_dep
+abc   it
+jkl   it
+def   hr
+uio  dev
+ghi  sales
+pqr   sales
+
+Write query ?
+
+Sol:-  Select emp_name, emp_dep
+       FROM table
+       ORDER BY
+        	   Case WHEN emp_dep = "it' Then 1
+                  WHEN emp_dep = 'hr' THEN 2
+				  WHEN emp_dep = 'dev' Then 3
+                  WHEN emp_dep = 'sales' THEN 4
+				  ELSE 5
+		        END,
+			emp_name;	
+
+Q:- tbl1.id 1,2,3
+tbl2.id 1,2,2,3,3,3
+
+select tbl1.id 
+from tbl1
+join tbl2
+on tbl1.id>=tbl2.id
+
+Sol:- 1 222 333333	
+
+TABLE A
+ID
+1
+1
+2
+3
+4
+'NULL'
+'NULL'
+NULL
+
+
+TABLE B
+ID
+1
+2
+3
+4
+4
+'NULL'
+NULL
+NULL
+
+Select * from table a join table b on a.id=b.id
+
+Innerjoin
+1 1
+1 1
+2 2
+3 3
+4 4
+4 4
+'null' 'null'
+'null' 'null'
+row count = 8
+
+Left Join
+
+1 1
+1 1
+2 2
+3 3
+4 4
+4 4
+'null' 'null'
+'null' 'null'
+null null
+
+row count = 9
+
+right join
+1 1
+1 1
+2 2
+3 3
+4 4
+4 4
+'null' 'null'
+'null' 'null'
+null null
+null null
+
+row count = 10
+
+full outer join
+1 1
+1 1
+2 2
+3 3
+4 4
+4 4
+'null' 'null'
+'null' 'null'
+null null
+null null
+
+row count = 10
+
+OUTPUT:
+inner join 8
+left join  9
+right join  10
+full join 10			  
+
+-----------------------------------------------------
+
+Q:
+IDA   |    IDB
+-----------------  
+1      | 1
+1      | 1 
+1      | 1
+1      | 2
+1      |  
+
+
+SELECT AA.ID,BB.ID FROM TBL_1 T1 Inner/LEFt/right/outer JOIN TBL_2 T2 ON AA.ID = BB.ID
+
+Sol:-
+inner join
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+row count = 15
+
+
+left join
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+row count = 15
+
+
+right join
+
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+null 2
+row count = 16
+
+outer join
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+1 1
+null 2
+row count = 16
+
+------------------------------
+col1 col2 col3 timestamp
+1      1   2   01/04/2021 17:00
+2      3   5   01/04/2021 17:00
+1      1   2   01/04/2021 19:00
+3      4   5   01/04/2021 17:00
+
+
+
+col1	col2	col3	latest_timestamp
+1	1	2	01/04/2021 19:00
+2	3	5	01/04/2021 17:00
+3	4	5	01/04/2021 17:00
+
+SELECT col1, col2, col3, MAX(timestamp) AS latest_timestamp
+FROM your_table
+GROUP BY col1, col2, col3;
+----------------------------------------------
+
+Find the name of the user who has rated the greatest number of movies. In case of a tie, return the lexicographically smaller user name.
+Find the movie name with the highest average rating in February 2020. In case of a tie, return the lexicographically smaller movie name.
+Movies table:
++-------------+--------------+
+| movie_id    |  title       |
++-------------+--------------+
+| 1           | Avengers     |
+| 2           | Frozen 2     |
+| 3           | Joker        |
++-------------+--------------+
+Users table:
++-------------+--------------+
+| user_id     |  name        |
++-------------+--------------+
+| 1           | Daniel       |
+| 2           | Monica       |
+| 3           | Maria        |
+| 4           | James        |
++-------------+--------------+
+MovieRating table:
++-------------+--------------+--------------+-------------+
+| movie_id    | user_id      | rating       | created_at  |
++-------------+--------------+--------------+-------------+
+| 1           | 1            | 3            | 2020-01-12  |
+| 1           | 2            | 4            | 2020-02-11  |
+| 1           | 3            | 2            | 2020-02-12  |
+| 1           | 4            | 1            | 2020-01-01  |
+| 2           | 1            | 5            | 2020-02-17  | 
+| 2           | 2            | 2            | 2020-02-01  | 
+| 2           | 3            | 2            | 2020-03-01  |
+| 3           | 1            | 3            | 2020-02-22  | 
+| 3           | 2            | 4            | 2020-02-25  | 
++-------------+--------------+--------------+-------------+
+Output: 
++--------------+
+| results      |
++--------------+
+| Daniel       |
+| Frozen 2     |
++--------------+
+Sol:-
+# Write your MySQL query statement below
+-- Get the most active user by rating count
+(select a.name as results 
+ from Users a 
+ join MovieRating b on a.user_id = b.user_id
+ group by a.user_id 
+ order by count(b.rating) desc, a.name 
+ limit 1)
+
+union all
+
+-- Get the highest-rated movie in February
+(select c.title as results 
+ from Movies c 
+ join MovieRating b on c.movie_id = b.movie_id
+ where month(b.created_at) = 2 
+   and year(b.created_at) = 2020 -- Ensure correct year
+ group by c.movie_id 
+ order by avg(b.rating) desc, c.title 
+ limit 1);
+---------------------------------------------------------------------
+Q:-   Pivot the Occupation column in OCCUPATIONS so that each Name is sorted alphabetically and displayed underneath its corresponding Occupation. The output should consist of four columns (Doctor, Professor, Singer, and Actor) in that specific order, with their respective names listed alphabetically under each column.
+
+Note: Print NULL when there are no more names corresponding to an occupation.
+
+input;- name(string)     occupation(string)
+
+output:- 
+Jenny    Ashley     Meera  Jane
+Samantha Christeen  Priya  Julia
+NULL     Ketty      NULL   Maria
+
+Sol:-
+Method-1
+
+SELECT MIN(IF(Occupation = 'Doctor',Name,NULL)),MIN(IF(Occupation = 'Professor',Name,NULL)),MIN(IF(Occupation = 'Singer',Name,NULL)),MIN(IF(Occupation = 'Actor',Name,NULL)) 
+FROM(
+    SELECT ROW_NUMBER() OVER(PARTITION BY Occupation
+                             ORDER BY Name) AS row_num,
+            Name, 
+            Occupation
+    FROM OCCUPATIONS) AS ord
+GROUP BY row_num;
+-----------
+Method-2
+WITH doctor AS (
+    SELECT name, ROW_NUMBER() OVER (ORDER BY name) AS rowe 
+    FROM OCCUPATIONS 
+    WHERE occupation = 'Doctor'
+),
+professor AS (
+    SELECT name, ROW_NUMBER() OVER (ORDER BY name) AS rowe 
+    FROM OCCUPATIONS 
+    WHERE occupation = 'Professor'
+),
+singer AS (
+    SELECT name, ROW_NUMBER() OVER (ORDER BY name) AS rowe 
+    FROM OCCUPATIONS 
+    WHERE occupation = 'Singer'
+),
+actor AS (
+    SELECT name, ROW_NUMBER() OVER (ORDER BY name) AS rowe 
+    FROM OCCUPATIONS 
+    WHERE occupation = 'Actor'
+)
+SELECT d.name AS doctor, p.name AS professor, s.name AS singer, a.name AS actor
+FROM professor p
+LEFT JOIN doctor d ON d.rowe = p.rowe
+LEFT JOIN singer s ON s.rowe = p.rowe
+LEFT JOIN actor a ON a.rowe = p.rowe
+
+UNION
+
+SELECT d.name, p.name, s.name, a.name
+FROM doctor d
+LEFT JOIN professor p ON d.rowe = p.rowe
+LEFT JOIN singer s ON d.rowe = s.rowe
+LEFT JOIN actor a ON d.rowe = a.rowe;
+--------------------------------------------------------------------------------------
+Q;-   Write a query to find the node type of Binary Tree ordered by the value of the node. Output one of the following for each node:
+
+Root: If node is root node.
+Leaf: If node is leaf node.
+Inner: If node is neither root nor leaf node.
+
+Sol:-
+Select N, case when P is null then 'Root'
+               when (Select count(*) From BST where P = A.N )>0 then 'Inner'
+               else 'Leaf'
+          end
+From BST A
+order by N;
+          
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------
+	
+Q:- Write a python program to print all the sub arrays with sum 0 (use 1 for loop).	
+Sol:-
+      def find_zero_sum_subarrays(arr):
+    sum_map = {}                # Stores sum → indices
+    curr_sum = 0                # Running sum
+
+    for i in range(len(arr)):
+        curr_sum += arr[i]      # Update running sum
+        
+        # Case 1: Subarray found from index 0 to i
+        if curr_sum == 0:
+            print(f"Subarray with sum 0: {arr[0:i+1]}")
+        
+        # Case 2: Subarray found between indices
+        if curr_sum in sum_map:
+            for start_index in sum_map[curr_sum]:
+                print(f"Subarray with sum 0: {arr[start_index + 1:i + 1]}")
+        
+        # Add the current sum to the map
+        sum_map.setdefault(curr_sum, []).append(i)
+
+# Example usage
+arr = [3, 4, -7, 3, 1, 3, 1, -4, -2, 2]
+find_zero_sum_subarrays(arr);
+
+Q:-What optimization techniques do you use in BQ
+Sol:- When working with BigQuery (BQ), using optimization techniques is essential for faster queries and lower costs. 
+	     Partitioning tables: Split data into smaller chunks based on dates or specific fields.
+         Clustering tables: Helps organize data, reducing the amount of scanned data.
+		 SELECT only necessary columns: Avoid SELECT *, as it scans unnecessary data.
+		 Filter early with WHERE clauses: Use filters as early as possible to reduce the result set.
+		 Use approximate aggregation functions: E.g., APPROX_COUNT_DISTINCT instead of COUNT(DISTINCT) for faster results.
+		 Avoid self-joins when possible: Try using ARRAY and STRUCT instead.
+		 Limit result sets: Use LIMIT for debugging or testing queries.
+		 Materialized views: Precompute and store results for frequent, costly queries.
+		 Result caching: Enable result caching to avoid reprocessing identical queries.
+		 Use temporary tables: Store intermediate results in temporary tables to avoid recalculating.
+		 Use proper joins: Prefer INNER JOIN over LEFT JOIN if you don’t need unmatched rows.
+		 Flatten nested data carefully: Use UNNEST() only when needed, as it can explode row counts.
+		 Optimize window functions: Minimize partition size in WINDOW functions to reduce computation.
+
+Q:- Explain types of storage in GCS.
+Sol:-     Multi-regional(Standard Clsss)   Nearline Class   Coldline   Archive	
+
+Q:- Explain the architecture of Big Query. How big query works internally?
+Sol:-   BigQuery Architecture:
+			1. Front-end (Query Interface)
+				How you interact with BigQuery:
+				UI (Console): Visual interface to run queries and view results.
+				CLI & REST API: For programmatic access.
+				Client Libraries: Python, Java, etc.
+				
+			2. Storage Layer (Colossus)
+				Columnar Storage: Stores data in columns (not rows) for fast analytical queries.
+				Distributed, Immutable Storage: Data is automatically sharded and replicated.
+				Separation of Compute & Storage: Storage and compute are decoupled, so scaling is easier and cheaper.
+				Data is stored in multiple layers:
+				
+				Table & Partition: Logical structure.
+				Column chunks: Optimized for compression and faster scans.	
+				
+			3. Compute Layer (Dremel)
+				Dremel Engine: A distributed query execution engine.
+				Tree Architecture: Splits queries into smaller tasks, executes them in parallel, and aggregates results.
+				Massive Parallel Processing (MPP): Automatically parallelizes queries across thousands of nodes.
+				🔧 Stages of Query Execution:
+				
+				Parsing: SQL query is parsed into an execution plan.
+				Query Planner & Optimizer: Optimizes the query for efficiency (e.g., pruning unused columns).
+				Execution: Split into smaller jobs, distributed across nodes, and results are combined.	
+				
+			4. Networking & Security Layer
+				Borg (Cluster Management): Manages and schedules tasks on Google’s infrastructure.
+				Encryption: Data is encrypted at rest and in transit.
+				IAM & Access Control: Granular access to datasets, tables, or even columns.	
+				
+			5. Caching & Result Storage
+				Result Caching: Query results are cached for 24 hours to avoid redundant processing.
+				Temporary Storage: For intermediate query results.	 
+				
+	
+	For Short:-
+	      1) Front-end (Query Interface): Use BigQuery via UI, CLI, API, or client libraries to submit SQL queries.
+		2) 	Storage Layer (Colossus): Stores data in a columnar, distributed, and replicated format, optimized for fast reads.
+		3)	Compute Layer (Dremel): Executes queries using a tree-based, massively parallel processing (MPP) engine.
+		4)	Networking & Security Layer: Manages cluster resources, secures data with encryption, and controls access via IAM.
+		5)	Caching & Result Storage: Caches query results for 24 hours and uses temporary storage for intermediate computations.
+
+Q:- Why is BQ use Columnar wise ?
+sol:- BigQuery uses columnar storage because processing byte depends on no. of columns fetched and for faster reads, better compression, efficient     		aggregations, parallel processing, and lower query costs.		
+
+q:-What are the types of big query tables.
+Sol:-
+      Here are the types of tables in BigQuery! 🚀
+
+	Native Tables: Stored directly in BigQuery's internal storage.
+	External Tables: Linked to external data sources (like GCS, Cloud Storage, or Drive).
+	Materialized Views: Precomputed, cached results of a query for faster access.
+	Temporary Tables: Created within a session and automatically deleted when the session ends.
+	Partitioned Tables: Tables divided into segments (like by date) to improve query performance.
+	Clustered Tables: Data is automatically sorted based on specific columns for optimized scanning.
+
+
+Q:- OLTP vs OLAP
+
+Sol:-
+
+Feature	       OLTP (Online Transaction Processing)	                OLAP (Online Analytical Processing)
+
+Purpose	       Handles real-time transactions	                    Performs analytical queries on large datasets
+Data Type	   Operational, current data	                         Historical, aggregated data
+Queries	       Simple, fast, transactional (INSERT, UPDATE, DELETE)	Complex, read-heavy (SELECT, JOIN, GROUP BY)
+Normalization	Highly normalized (many tables, fewer duplicates)	Denormalized (fewer tables, faster queries)
+Performance	    Optimized for fast transactions	                    Optimized for complex analytics
+Example	        Banking, e-commerce, ERP systems	                Data warehouses, BI reporting, BigQuery
+
+Q:-
+BigQuery (BQ): A fully managed, serverless data warehouse by Google Cloud, 
+designed for fast SQL analytics on large datasets using a distributed architecture. 
+
+Pub/Sub: A messaging service for real-time event streaming, enabling asynchronous communication between decoupled systems.
+
+GCS (Google Cloud Storage): A scalable, secure object storage service for storing and retrieving any amount of data.
+
+Dataflow: A fully managed service for stream and batch data processing, built on Apache Beam. 
+
+Data Studio (now Looker Studio): A tool to create interactive, customizable dashboards and reports from various data sources.
+
+App Engine: A fully managed platform for building and deploying web apps and APIs without managing infrastructure. 
+
+VM (Virtual Machine): A virtualized server that runs applications and operating systems, hosted on Google Compute Engine. 
+
+Cloud Run: A fully managed service to run containerized applications, automatically scaling with incoming requests.
+
+Cloud Scheduler: A fully managed cron job service to run tasks or trigger events at scheduled times.
+
+Cloud Data Fusion: A fully managed, no-code data integration service for building and managing ETL/ELT pipelines.
+
+Bigtable: A fully managed NoSQL database by Google Cloud, designed for low-latency, high-throughput workloads with massive scalability.
+
+Cloud Function: A serverless compute service that runs single-purpose functions in response to events.
+
+Terraform: An open-source Infrastructure as Code (IaC) tool to define, provision, and manage cloud resources using configuration files.
+
+GitHub Actions: A CI/CD tool to automate workflows like testing, building, and deploying code directly from your GitHub repository.
+
+Cloud Build: A fully managed service to build, test, and deploy applications in the cloud, supporting CI/CD pipelines.
+
+Docker: A platform to build, package, and run applications in lightweight, portable containers.
+
+
+
+Function	IFNULL	                                            COALESCE
+Definition	Returns a value if the first argument is NULL.	   Returns the first non-NULL value from a list.
+Arguments	Takes exactly 2 arguments.	                       Can take 2 or more arguments.
+Example	    IFNULL(col1, 'default')	                           COALESCE(col1, col2, 'default')
+
+COALESCE: Returns the first non-NULL value from a list of expressions.
+SELECT COALESCE(NULL, NULL, 'Hello', 'World') AS result;
+output:- Hello
+
+Data Warehouse: A centralized system for storing and analyzing large volumes of structured data, optimized for complex queries and reporting.
+
+Data Lake: A centralized repository that stores vast amounts of raw, unstructured, semi-structured, and structured data at any scale. 
+
+
+Lambda Function: An anonymous, single-line function in Python defined with the lambda keyword.
+add = lambda x, y: x + y  
+print(add(2, 3))  # Output: 5
+
+
+Feature	             View	                                             Materialized View
+Data Storage	No storage — just a saved SQL query.	          Stores precomputed query results.
+Query Performance	Executes the query every time you access it.	Faster — serves stored results.
+Freshness	  Always shows live, updated data.	                  Updates periodically (not real-time).
+Cost	      Query cost every time you run it.	                      Storage cost, but cheaper query cost.
+Use Case	 For frequently changing data or lightweight queries.	For complex, heavy queries run repeatedly.
+
+  
+
