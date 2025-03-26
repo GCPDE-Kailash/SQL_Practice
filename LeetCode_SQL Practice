@@ -1,0 +1,622 @@
+Question-
+sWrite a query to retrieve the names of customers who were either not referred 
+by the person with referee_id = 2 or who have no referee (referee_id is NULL).
+# Write your MySQL query statement below
+select name 
+from customer 
+where referee_id != 2
+ or referee_id is null;
+
+Question-
+Write a query to find the IDs of tweets where the content has more than 15 characters. The query should return a single column, tweet_id, containing the IDs of these tweets.
+# Write your MySQL query statement below
+select tweet_id 
+from Tweets 
+where length(content) >15
+
+Question-
+Write a query to retrieve each employee's unique_id and name, including all employees even if they don’t have a matching entry in the EmployeeUNI table. Use a left join to ensure all rows from the Employees table are included.
+# Write your MySQL query statement below
+select unique_id , name 
+from Employees 
+left join EmployeeUNI using(id)
+
+Question-
+Write a query to find the count of visits for each customer where no transaction was made (i.e., amount is NULL for that visit).
+ The query should return two columns: customer_id and count_no_trans (the number of visits without transactions for each customer).
+ 
+#M1 Write your MySQL query statement below
+select t1.customer_id ,count(t1.customer_id) as count_no_trans 
+from Visits t1 
+left join Transactions t2  using(visit_id) 
+where t2.amount is null 
+group by t1.customer_id;
+
+# M2 Write your MySQL query statement below
+select customer_id, count(customer_id) as count_no_trans 
+from Visits 
+where visit_id not in (select visit_id from Transactions) 
+group by customer_id ;
+
+Question-
+Write a query to find the IDs of days where the temperature was higher than the previous day. 
+The query should compare each row with the row for the previous day
+# Write your MySQL query statement below
+select a.id 
+from Weather a,Weather b 
+where dateDiff(a.recordDate,b.recordDate) =1
+AND a.temperature > b.temperature;
+
+Question-
+Write a query to calculate the average processing time for each machine, defined as the time difference (in seconds) between the 'start' and 'end' timestamps for each process on that machine. The result should include two columns: machine_id and processing_time, where processing_time is rounded to three decimal places.
+# Write your MySQL query statement below
+select t1.machine_id, round(avg(t2.timestamp-t1.timestamp),3) as processing_time 
+from Activity t1 
+join Activity t2 
+on t1.machine_id = t2.machine_id 
+and t1.process_id=t2.process_id 
+and t1.activity_type = 'start' 
+and t2.activity_type = 'end' 
+group by t1.machine_id;
+
+Question-
+Write a query to retrieve the names of employees who either received a bonus of less than 1000 or did not receive a bonus at all. The result should contain two columns: name and bonus.
+# Write your MySQL query statement below
+select a.name, b.bonus 
+from Employee a 
+left join Bonus b 
+using (empId) 
+where b.bonus <1000 
+or b.bonus is null;
+
+Question-
+Write a query to retrieve each student's attendance record in all subjects, including subjects where the student has not attended any exams. For each student and subject, return the student_id, student_name, subject_name, and the count of exams attended (attended_exams). Ensure the results are ordered by student_id and subject_name.
+# Write your MySQL query statement below
+select a.student_id, a.student_name, b.subject_name,count(c.subject_name) as attended_exams 
+from Students a
+cross join Subjects b 
+left join Examinations c
+on a.student_id = c.student_id
+AND b.subject_name = c.subject_name
+group by a.student_id,b.subject_name, a.student_name
+order by a.student_id,b.subject_name;
+
+#N-nd highest salary(put your number) if no null salary and not having duplicate
+with SalaryRank as (
+		Select salary,
+				row_number() over(order by salary desc) as rn 
+		from Employee
+				)
+Select salary from SalaryRank where rn = N;
+
+#N-nd highest salary(put your number) if any null salary and having duplicate
+with SalaryRank as (
+		Select salary,
+				dense_rank() over(order by salary desc) as rn 
+		from Employee
+		where salary is not null
+				)
+Select max(case when rn =N then salary else null end) as nthSalary
+ from SalaryRank;
+
+# Write your MySQL query statement below
+Select name from Employee where id in(select managerID from employee group by managerID having count(*)>=5);
+
+#
+
+MERGE INTO tableA AS A
+USING tableB AS B
+ON A.id = B.id
+WHEN MATCHED THEN
+    UPDATE SET A.colA = 'abc'
+WHEN NOT MATCHED THEN
+    INSERT (id, colA, colB, colC)  -- specify the columns to insert into
+    VALUES (B.id, B.colA, B.colB, B.colC);  -- provide the values for those columns
+---------------------------
+#
+Question-
+write the query use -
+input 
+id salary 
+1  900    
+2   800   
+3   800   
+4   700 
+1   900
+
+output
+id,  id_count
+1    2
+2    1
+3    1
+4    1  
+
+#Answer#
+with ranknum as (
+select id, 
+count(*), 
+row_number() over(partition by id order by id desc) rn 
+from table 
+where id is not null
+) 
+SELECT id, COUNT(rn) AS id_count
+FROM ranknum
+GROUP BY id
+ORDER BY id;
+--------------------------------------------------	
+# Write your MySQL query statement below
+Select s.user_id,  round(ifnull(avg(action = 'confirmed'),0),2 ) as confirmation_rate from Signups s 
+left join Confirmations c 
+on s.user_id = c.user_id
+group by s.user_id;
+
+# Write your MySQL query statement below
+Select * from Cinema where id%2 != 0 and description != 'boring' order by rating desc;
+
+# Write your MySQL query statement below
+Select a.product_id, 
+IFNULL(round(sum(price * units)/sum(units),2),0) as average_price 
+from Prices a 
+left join UnitsSold b 
+on a.product_id = b.product_id 
+and purchase_date 
+between start_date 
+and end_date 
+group by 1;
+
+# Write your MySQL query statement below
+SELECT
+    user_id,
+    name,
+    mail
+FROM
+    Users
+WHERE
+    mail LIKE '%@leetcode.com'
+    AND LEFT(mail, LENGTH(mail) - 13) REGEXP '^[A-Za-z][A-Za-z0-9._-]*$';
+	
+# Write your MySQL query statement below
+with temp as(SELECT
+    b.name AS Department,
+    a.name AS Employee,
+    a.salary AS Salary,
+    DENSE_RANK() OVER (PARTITION BY b.name ORDER BY a.salary DESC) AS rn
+FROM
+    Employee a
+ JOIN
+    Department b
+ON
+    a.departmentId = b.id
+)
+    Select Department, Employee, Salary 
+    from temp 
+    where rn between 1 and 3;
+
+
+# Write your MySQL query statement below
+Select teacher_id, count(distinct(subject_id)) as cnt 
+from Teacher group by teacher_id;
+
+# Write your MySQL query statement below
+select activity_date as day, count(distinct(user_id)) as active_users
+from Activity 
+where datediff('2019-07-27',activity_date)<30 
+and activity_date <= '2019-07-27'
+group by activity_date;
+
+#1-Nested-Query very slow
+select product_id,year as first_year, quantity, price
+from sales
+where(product_id,year) IN
+(select product_id,min(year) from sales
+group by product_id);
+
+# 2-Nested-Query very fast Write your MySQL query statement below
+Select product_id, year as first_year, quantity, price
+from (Select *, rank() over(partition by product_id order by year) rn
+from Sales ) t
+where rn =1;
+
+# 3-CTE-Query slow fast Write your MySQL query statement below
+WITH FirstYearSales AS (
+    SELECT
+        s.product_id,
+        MIN(s.year) AS first_year
+    FROM Sales s
+    GROUP BY s.product_id
+)
+SELECT
+    fys.product_id,
+    fys.first_year,
+    s.quantity,
+    s.price
+FROM FirstYearSales fys
+JOIN Sales s ON fys.product_id = s.product_id AND fys.first_year = s.year
+ORDER BY fys.product_id;
+
+## Write your MySQL query statement below
+ select class from Courses group by class having count(class) >=5;
+ 
+ # Write your MySQL query statement below
+select user_id, count(follower_id) as followers_count from Followers 
+group by user_id order by user_id;
+
+# Write your MySQL query statement below
+select max(num) as num from MyNumbers 
+where num IN (select num from MyNumbers group by num having count(num) =1);   
+
+#
+Select distinct(curr.empname) 
+from EMPLOYEE as curr
+left join EMPLOYEE as next
+on curr.empname = next.empname 
+AND curr.location = next.location
+AND curr.year = next.year -1
+where curr.vaccinated = 'yes'
+AND next.infected = 'yes';
+
+# Write your MySQL query statement below
+select a.customer_id as customer_id
+from Customer a
+group by 1
+Having count(Distinct(a.product_key)) = 
+(Select count(b.product_key) from Product b);
+
+# Write your MySQL query statement below
+Select m.employee_id, m.name, 
+count(e.reports_to) as reports_count, 
+round(avg(e.age*1.0),0) as average_age
+from (
+    Select reports_to, age 
+    from Employees 
+    ) e join (Select employee_id, name 
+    from Employees) m
+on e.reports_to = m.employee_id
+group by m.employee_id, m.name
+order by m.employee_id;
+
+# Write your MySQL query statement below
+SELECT employee_id, department_id
+FROM Employee
+GROUP BY 1
+HAVING COUNT(DISTINCT department_id) = 1
+UNION 
+SELECT employee_id, department_id
+FROM Employee
+WHERE primary_flag = "Y"
+ORDER BY employee_id;
+
+# Write your MySQL query statement below
+Select x,y,z, 
+case when x+y>z 
+and y+z>x 
+and z+x>y 
+then 'Yes' else 'No' end as triangle 
+from triangle;
+
+# Write your MySQL query statement below
+select distinct t3.num as ConsecutiveNums from logs t1
+join logs t2 on t1.id = t2.id+1
+join logs t3 on t1.id = t3.id+2
+where t1.num = t2.num and t1.num = t3.num; 
+----------
+#Get the Names of Employees with the Highest Salary in Each Department
+SELECT department, name, salary
+FROM employees AS e1
+WHERE salary = (SELECT MAX(salary) FROM employees AS e2 WHERE e1.department = e2.department);
+--------------
+
+K
+KA
+KAI
+KAIL
+KAILA
+KAILAS
+
+value = "KAILAS"
+
+for i in range(1, len(value) + 1):
+    print(value[:i])
+-----------------------------------
+TABLE A
+ID
+1
+1
+2
+3
+4
+'NULL'
+'NULL'
+NULL
+
+
+TABLE B
+ID
+1
+2
+3
+4
+4
+'NULL'
+NULL
+NULL
+
+Select * from table a join table b on a.id=b.id
+
+OUTPUT:
+inner join 8
+left join  9
+right join  10
+full join 10
+------------------------------------------------------------------
+years where revenue declined compared to the previous year.	
+rev    year
+1000 2001
+1400 2002
+900  2003
+1100 2004
+1000 2005
+
+write query to get 
+year	rev
+2003	900
+2005	1000
+
+Query:-
+Select year, rev
+from (select year, rev, LAG(rev) over(oreder by year) previous_rev
+From Table) rn
+where rev< previous_rev
+------------------------------------------------------------------------
+Question
+emp_name emp_dep
+abc   it
+def   hr
+ghi  sales
+uio  dev
+pqr   sales
+jkl   it
+
+Output
+emp_name emp_dep
+abc   it
+jkl   it
+def   hr
+uio  dev
+ghi  sales
+pqr   sales
+
+Write query ?
+
+SELECT emp_name, emp_dep  
+FROM table_name  
+ORDER BY 
+  CASE 
+    WHEN emp_dep = 'it' THEN 1  
+    WHEN emp_dep = 'hr' THEN 2  
+    WHEN emp_dep = 'dev' THEN 3  
+    WHEN emp_dep = 'sales' THEN 4  
+    ELSE 5
+  END,
+  emp_name;
+---------------------------------------------------
+tbl1.id 1,2,3
+tbl2.id 1,2,2,3,3,3
+
+select tbl1.id 
+from tbl1
+join tbl2
+on tbl1.id>=tbl2.id
+
+
+
+For tbl1.id = 1:
+1 >= 1 → ✅ Match
+Matches: 1
+For tbl1.id = 2:
+2 >= 1 → ✅ Match
+2 >= 2 → ✅ Match
+2 >= 2 → ✅ Match
+Matches: 2, 2, 2
+For tbl1.id = 3:
+3 >= 1 → ✅ Match
+3 >= 2 → ✅ Match
+3 >= 2 → ✅ Match
+3 >= 3 → ✅ Match
+3 >= 3 → ✅ Match
+3 >= 3 → ✅ Match
+Matches: 3, 3, 3, 3, 3, 3
+Final Output:
+tbl1.id
+1
+2
+2
+2
+3
+3
+3
+3
+3
+3
+➡️ Total rows: 10
+
+------------------------------------------
+Find the name of the user who has rated the greatest number of movies. In case of a tie, return the lexicographically smaller user name.
+Find the movie name with the highest average rating in February 2020. In case of a tie, return the lexicographically smaller movie name.
+
+Sol:-
+# Write your MySQL query statement below
+-- Get the most active user by rating count
+(select a.name as results 
+ from Users a 
+ join MovieRating b on a.user_id = b.user_id
+ group by a.user_id 
+ order by count(b.rating) desc, a.name 
+ limit 1)
+
+union all
+
+-- Get the highest-rated movie in February
+(select c.title as results 
+ from Movies c 
+ join MovieRating b on c.movie_id = b.movie_id
+ where month(b.created_at) = 2 
+   and year(b.created_at) = 2020 -- Ensure correct year
+ group by c.movie_id 
+ order by avg(b.rating) desc, c.title 
+ limit 1);
+-----------------------------------------------
+Q:-fetch all employees whose names contain the letter "a" exactly twice.
+
+Ans:-
+SELECT * 
+FROM Employee 
+WHERE LENGTH(name) - LENGTH(REPLACE(name, 'a', '')) = 2;
+------------------------------------------------------------
+Q:- how do you retrive duplicate records from table
+Ans:-
+SELECT name, COUNT(*) AS count 
+FROM Employee 
+GROUP BY name 
+HAVING COUNT(*) > 1;
+
+Q-If you want all details of duplicate employees:
+Sol:- SELECT * 
+FROM Employee 
+WHERE name IN (
+    SELECT name 
+    FROM Employee 
+    GROUP BY name 
+    HAVING COUNT(*) > 1
+);
+------------------------------------
+
+Q:-write a query to calculate the running total of sales by date
+Sol- 
+Select sale_date, sale_amount, sum(sale_amount) over(order by sale_date) running_totals
+     From Sales;
+	 
+Q:- write a query to calculate the running total of sales by date for month wise selling date and running total
+
+Sol:- 
+Select sale_date, sale_amount, sum(sale_amount) over(partition by month(sale_date) order by sale_date) ruuning _total
+From Sales;
+	 
+-------------------------------------------------
+Q;- Find Employees who earn more than the average salary in their departments ?
+Sol;- 
+
+with cte as (
+ Select employee, employee_salary, avg(employee_salary) over(partition by department order by department) aveg_sal
+ From Employees
+ ) emp_sal
+ Select employee, employee_salary from cte where employee_salary > aveg_sal;
+
+----------------------------------------------------------------------
+Q:- Write a query  to find the most frequently occurring value in a column?
+Sol:-  
+  Select column_name, count(*) as frequently
+  From TABLE
+  group by column_name
+  having frequently >1 Desc
+  limit 1;
+----------------------------------------------------------------------------
+Q:- Fetch the records where the date is within the last 7 days from today ?
+
+Sol:- select * from Table where date_column >= current_date() - intervel 7 Day ;
+
+------------------------------------------------------------
+Q:- Wirte a querry to count how many  employees share the same salary ?
+Sol:- 
+	SELECT salary, COUNT(*) AS employee_count
+	FROM Employee
+	GROUP BY salary
+	HAVING COUNT(*) > 1;
+
+----------------------------------------------------------
+Q:- How do you fetch the top 3 records for each group in table ?
+Sol:- 
+	SELECT *
+	FROM (
+		SELECT *, ROW_NUMBER() OVER (PARTITION BY group_column ORDER BY ranking_column DESC) AS rnk
+		FROM table_name
+	) ranked
+	WHERE rnk <= 3;
+--------------------------------------------------------------
+Q:-  Retrive products that were never sold (hint: use left join)
+Sol:- SELECT p.*
+		FROM Product p
+		LEFT JOIN Sales s ON p.product_id = s.product_id
+		WHERE s.product_id IS NULL;
+		
+--------------------------------------------------------------------------
+Q:- Reterive Customers who made their first purchase in the last 6 months ?
+Sol:- Method-1
+ 
+		Select * FROM (
+		Select c*, rank() over(partition by customer_id order by purchase_date) rnk
+		    From Customer)
+			
+		where rnk = 1 and purchase_date Between Current_Date()- Intervel 6 MONTH AND current_date();
+
+Method-2
+      Select customer_id, Min(purchase_date) as purchase_date
+	  From Customer
+	  Group by Customer_id 
+	  Having purchase_date Between Current_Date- Intervel 6 MONTH AND current_date;
+ -----------------------------------------------------------------------------
+Q:- How do you piovt a table to covert rows into columns ?
+
+Input-
+employee_id	department	salary
+1	IT	5000
+1	HR	4000
+2	IT	6000
+2	Finance	5500
+3	HR	4500
+
+output- 
+employee_id	IT_Salary	HR_Salary	Finance_Salary
+1	5000	4000	0
+2	6000	0	5500
+3	0	4500	0
+
+Sol:- SELECT 
+    employee_id,
+    SUM(CASE WHEN department = 'IT' THEN salary ELSE 0 END) AS IT_Salary,
+    SUM(CASE WHEN department = 'HR' THEN salary ELSE 0 END) AS HR_Salary,
+    SUM(CASE WHEN department = 'Finance' THEN salary ELSE 0 END) AS Finance_Salary
+FROM Employee
+GROUP BY employee_id;
+
+-----------------------------------------------------------
+Q:- Write a query to calculate the percentage change in sales month- over-month ?
+
+input-
+sale_date	sales_amount
+2024-01-10	5000
+2024-01-15	3000
+2024-02-12	7000
+2024-02-20	6000
+2024-03-05	9000
+
+output-
+sales_month	total_sales	prev_month_sales	percentage_change
+2024-01	8000	NULL	NULL
+2024-02	13000	8000	62.50%
+2024-03	9000	13000	-30.77%
+
+Sol:- SELECT 
+    sales_month, 
+    total_sales,
+    LAG(total_sales) OVER (ORDER BY sales_month) AS prev_month_sales,
+    ROUND(((total_sales - LAG(total_sales) OVER (ORDER BY sales_month)) / 
+           LAG(total_sales) OVER (ORDER BY sales_month)) * 100, 2) AS percentage_change
+FROM (
+    SELECT 
+        DATE_FORMAT(sale_date, '%Y-%m') AS sales_month, 
+        SUM(sales_amount) AS total_sales
+    FROM Sales
+    GROUP BY sales_month
+) monthly_sales;
+--------------------------------------------------------
