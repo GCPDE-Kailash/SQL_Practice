@@ -620,3 +620,168 @@ FROM (
     GROUP BY sales_month
 ) monthly_sales;
 --------------------------------------------------------
+Q:- Find the median salary of employees  in a table ?
+Sol:- 
+        SELECT AVG(salary) AS median_salary
+		FROM (
+			SELECT salary 
+			FROM employees
+			ORDER BY salary
+			LIMIT 2 - (SELECT COUNT(*) FROM employees) % 2  -- Picks 1 or 2 values based on odd/even count
+			OFFSET (SELECT (COUNT(*) - 1) / 2 FROM employees)  -- Skips rows to reach the middle
+		) AS subquery;
+
+
+-------------------------------------------------------------
+Q:- Fetch all users who logged in consecutively for 3 days or more. ?
+Sol:- 
+      with user_login_date as(
+				Select user_id, login_date,
+				    LAG(login_date,1) over(partition by user_id order by login_date) as previousDay1
+					LAG(login_date,2) over(partition by user_id order by login_date) as previousDay2
+					
+					FROM Employee)
+	Select DISTINCT(Login_date) 
+	FROM user_login_date 
+	Where Login_date = previousDay1 + intervel 1 Day
+	AND previousDay1 = previousDay2 + intervel 1 Day;
+
+-------------------------------------@@@@-------------------------------
+Q:- Write A Query to delete duplicate rows while keeping one occurance?
+Sol:- Method-1
+    with cte as (
+	  Select *, Row_number() over(partition by co1,col2,col3 order by id) as rnk
+          from table)
+	Delete from table 
+	where id in (Select id from cte where rnk >1);
+	
+---	Method-2
+	
+	Delete From TABLE
+	where id not in 
+	(Select min(id) from table group by col1,col2,col3);
+--------------------------------------------------------------------------
+Q:-Create a Query to calculate the ratio of sales  between two categories.
+Sol:- 
+       Select 
+	       Sum(Case when category = "category_A" then sale else 0 END) *1.0 /
+		   SUM(CASE When category = "category_B" then sale else 0 END) as sales_ration
+		   FROM Sales_Table;
+-------------------------------------------------------------------------
+Q:- How would you implement a recursive query to generate a hierarchical structure ?
+
+input-
+id	name	manager_id
+1	CEO	NULL
+2	Manager1	1
+3	Manager2	1
+4	Employee1	2
+5	Employee2	2
+6	Employee3	3
+
+output-
+id	name	manager_id	level
+1	CEO	NULL	1
+2	Manager1	1	2
+3	Manager2	1	2
+4	Employee1	2	3
+5	Employee2	2	3
+6	Employee3	3	3
+Sol:- 
+      WITH RECURSIVE hierarchy AS (
+			-- Base Case: Start with the top-level employee (CEO)
+			SELECT id, name, manager_id, 1 AS level
+			FROM employees
+			WHERE manager_id IS NULL 
+
+			UNION ALL
+
+			-- Recursive Case: Get employees reporting to the above employees
+			SELECT e.id, e.name, e.manager_id, h.level + 1
+			FROM employees e
+			JOIN hierarchy h ON e.manager_id = h.id
+		)
+	  SELECT * FROM hierarchy ORDER BY level, manager_id;
+--------------------------------------@@@@------------------------------------
+Q:- Write a query to find gaps in sequential numbering within a table?
+input-userId
+1
+2
+3
+5
+6
+9
+output-
+userId	previous_userId	gap
+5	3	2
+9	6	3
+Sol:- Select user_id, previous_user_id, user_id - previous_user_id as gaps
+      ( Select user_id, 
+      LAG(user_id, 1) over(order by userId) as previous_user_id
+	  FROM Employee
+	  ) sub_query
+	  where user_id - previous_user_id >1;
+--------------------------------------------------------------
+	  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	                   
